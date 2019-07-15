@@ -97,7 +97,7 @@ if __name__ == "__main__":
     try:
         start_scheduler()
         settings = load_settings()
-        app.run(host=settings["bind-addr"], port=5000)
+        app.run(host=settings["bind-addr"], port=settings["bind-port"])
     finally:
         print("Waiting for scheduler to quit...")
         stop_scheduler()

@@ -1,13 +1,12 @@
 [Unit]
-Description=Web service to allow control of an RGB led strip
+Description=Web service to allow control of an RGB led strip connected via GPIO
 
 [Service]
 User=pi
 # The configuration file application.properties should be here:
-#change this to your workspace
+# change this to your workspace
 WorkingDirectory=/home/pi/src/rgb-app
-#path to executable.
-#executable is a bash script which calls jar file
+# path to executable
 ExecStart=python3 /home/pi/src/rgb-app/rgb_app.py
 SuccessExitStatus=143
 TimeoutStopSec=10
