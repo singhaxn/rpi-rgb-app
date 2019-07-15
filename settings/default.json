@@ -1,0 +1,27 @@
+{
+    "on": false,
+    "color": [
+        255,
+        255,
+        255
+    ],
+    "brightness": 100,
+    "presets": {},
+    "schedule": {
+        "enabled": false,
+        "on": {
+            "time": "00:00",
+            "transition": 0
+        },
+        "off": {
+            "time": "00:00",
+            "transition": 0
+        }
+    },
+    "pins": [
+        23,
+        24,
+        25
+    ],
+    "bind-addr": "127.0.0.1"
+}

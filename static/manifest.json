@@ -1,0 +1,21 @@
+{
+  "short_name": "PiRGB",
+  "name": "PiRGB",
+  "icons": [
+    {
+      "src": "/static/images/icons-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/static/images/icons-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#202020",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#202020"
+}

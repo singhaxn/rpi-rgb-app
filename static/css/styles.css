@@ -1,0 +1,108 @@
+body {
+  background: #222;
+  text-align: center;
+  color: #ccc;
+  font-family: sans-serif;
+}
+
+input[type="text"].channel, input[type="text"].brightness {
+  width: 32px;
+  vertical-align: middle;
+}
+
+input[type="range"].channel, input[type="range"].brightness {
+  width: 80%;
+  vertical-align: middle;
+}
+
+input[type="button"] {
+  padding: 12px;
+  background-color: #888;
+  color: white;
+  border: 1px solid #666;
+}
+
+div.row {
+  padding: 8px;
+  background-color: #444;
+  text-align: center;
+  vertical-align: middle;
+  margin: 0;
+  border: 1px solid #888;
+}
+
+.preview {
+  text-align: center;
+}
+
+.red {
+  background: #844 !important;
+}
+
+.green {
+  background: #484 !important;
+}
+
+.blue {
+  background: #448 !important;
+}
+
+.hidden {
+  display: None;
+}
+
+input[type="button"].powerbtn {
+  width: 48px;
+  height: 48px;
+  font-size: 20pt;
+  border-radius: 24px;
+  padding: 0px !important;
+  color: white;
+}
+
+.power-off {
+  background-color: #c00 !important;
+}
+
+.power-on {
+  background-color: #0c0 !important;
+}
+
+div#container {
+  max-width: 320px;
+  margin: auto;
+}
+
+div#power-container {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+select#selPresets {
+  width: 100%;
+  background-color: inherit;
+  border: 0;
+  overflow: auto;
+}
+
+option.preset {
+  color: white;
+  text-shadow: 1px 1px gray;
+  padding: 8px;
+  text-align: center;
+  margin: 4px;
+  font-weight: bold;
+}
+
+#txtPreset {
+  width: 60%;
+  padding: 8px;
+  font-weight: bold;
+}
+
+input.table-cell {
+  width: 80px;
+}
+
+div.schedule {
+}

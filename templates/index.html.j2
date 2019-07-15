@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <title>Pi RGB</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" href="static/images/icons-32.png" />
+  <link rel="stylesheet" href="static/css/styles.css"/>
+  <link rel="stylesheet" href="static/fontawesome-free/css/all.min.css"/>
+  <script src="static/js/jquery-3.4.1.min.js"></script>
+  <script src="static/js/index.js"></script>
+</head>
+<body>
+  <div id="container">
+    <div id="power-container">
+      <input id="btnPower" type="button" class="fa powerbtn" value="&#xf011;" data-checked='{{ settings["on"] }}'></input>
+    </div>
+    <div id="settings-container">
+      <h3>Presets</h3>
+      <div class="row">
+        <select id="selPresets" size="8"></select>
+      </div>
+      <div class="row">
+        <input id="txtPreset" type="text"></select>
+        <input id="btnSave" type="button" class="fa" value="&#xf0c7;"></select>
+        <input id="btnDelete" type="button" class="fa" value="&#xf2ed;"></select>
+      </div>
+      <h3>Color</h3>
+      <div class="row red">
+        <input id="rngR" class="channel" type="range" value="{{ settings.color[0] }}" min="0" max="255" data-index="0"></input>
+        <input id="txtR" class="channel" type="text" value="{{ settings.color[0] }}" readonly></input>
+      </div>
+      <div class="row green">
+        <input id="rngG" class="channel" type="range" value="{{ settings.color[1] }}" min="0" max="255" data-index="1"></input>
+        <input id="txtG" class="channel" type="text" value="{{ settings.color[1] }}" readonly></input>
+      </div>
+      <div class="row blue">
+        <input id="rngB" class="channel" type="range" value="{{ settings.color[2] }}" min="0" max="255" data-index="2"></input>
+        <input id="txtB" class="channel" type="text" value="{{ settings.color[2] }}" readonly></input>
+      </div>
+      <div class="row preview">
+        <input id="btnApply" type="button" value="Apply"></input>
+      </div>
+      <h3>Brightness</h3>
+      <div class="row">
+        <input id="rngBrightness" class="brightness" type="range" value="{{ settings.brightness }}" min="0" max="100"></input>
+        <input id="txtBrightness" class="brightness" type="text" value="{{ settings.brightness }}" readonly></input>
+      </div>
+      <h3>Schedule</h3>
+      <div class="row">
+        <label><input id="chkSchedule" type="checkbox" data-init-checked='{{ settings["schedule"]["enabled"] }}'/>Enabled</label>
+      </div>
+      <div class="row schedule">
+        <table>
+          <tr>
+            <th>Event</th>
+            <th>Time (hh:mm)</th>
+            <th>Transition (minutes)</th>
+          </tr>
+          <tr>
+            <td>On</td>
+            <td><input id="txtOnTime" class="table-cell" type="text" value='{{ settings["schedule"]["on"]["time"] }}'/></td>
+            <td><input id="txtOnTransition" class="table-cell" type="text" value='{{ settings["schedule"]["on"]["transition"] }}'/></td>
+          </tr>
+          <tr>
+            <td>Off</td>
+            <td><input id="txtOffTime" class="table-cell" type="text" value='{{ settings["schedule"]["off"]["time"] }}'/></td>
+            <td><input id="txtOffTransition" class="table-cell" type="text" value='{{ settings["schedule"]["off"]["transition"] }}'/></td>
+          </tr>
+        </table>
+      </div>
+      <div class="row schedule">
+        <input id="btnSaveSchedule" type="button" value="Save"></input>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
