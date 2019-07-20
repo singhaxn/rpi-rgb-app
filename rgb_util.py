@@ -45,32 +45,42 @@ def save_settings(settings):
 
     settings_lock.release()
 
+def to_seconds(hour, min, sec=0):
+    return (hour * 60 + min) * 60 + sec
+
+def to_offset(start, target):
+    return (target if target >= start else (24 * 60 * 60 + target)) - start
+
 def apply_color(settings):
     global settings_lock
     settings_lock.acquire()
 
     color = settings["color"] if settings["on"] else [0, 0, 0]
     brightness = settings["brightness"] / 100.0
+    state = {"in_transition": False}
 
     if settings["schedule"]["enabled"]:
         match_on = TIME_PATTERN.match(settings["schedule"]["on"]["time"])
         match_off = TIME_PATTERN.match(settings["schedule"]["off"]["time"])
 
         if match_on and match_off:
-            on_min = int(match_on.group("hour")) * 60 + int(match_on.group("minute"))
-            off_min = int(match_off.group("hour")) * 60 + int(match_off.group("minute"))
-            on_duration = (off_min if off_min >= on_min else (24 * 60 + off_min)) - on_min
+            on_sec = to_seconds(int(match_on.group("hour")), int(match_on.group("minute")))
+            off_sec = to_seconds(int(match_off.group("hour")), int(match_off.group("minute")))
+            on_duration = to_offset(on_sec, off_sec)
 
             now = dt.now()
-            now_min = now.hour * 60 + now.minute
-            now_offset = (now_min if now_min >= on_min else (24 * 60 + now_min)) - on_min
+            now_sec = to_seconds(now.hour, now.minute, now.second)
+            now_offset = to_offset(on_sec, now_sec)
 
             if now_offset <= on_duration:
-                on_trans = settings["schedule"]["on"]["transition"]
-                off_trans = settings["schedule"]["off"]["transition"]
+                on_trans = settings["schedule"]["on"]["transition"] * 60
+                off_trans = settings["schedule"]["off"]["transition"] * 60
                 on_ratio = 1 - max(on_trans - now_offset, 0) / float(on_trans)
                 off_ratio = 1 - max(off_trans - (on_duration - now_offset), 0) / float(off_trans)
-                brightness *= min(on_ratio, off_ratio)
+                ratio = min(on_ratio, off_ratio)
+                if ratio < 1.0:
+                    state["in_transition"] = True
+                brightness *= ratio
 
                 print("[{3}:{4}] on_ratio = {0}, off_ratio = {1}, brightness={2}".format(on_ratio, off_ratio, brightness, now.hour, now.minute))
             else:
@@ -80,6 +90,7 @@ def apply_color(settings):
         pi.set_PWM_dutycycle(p, 255 - round(c * brightness))
 
     settings_lock.release()
+    return state
 
 def trim_range(value, min, max):
     if value < min:
@@ -93,8 +104,8 @@ def scheduler_thread():
 
     while scheduler_active:
         settings = load_settings()
-        apply_color(settings)
-        time.sleep(60)
+        state = apply_color(settings)
+        time.sleep((65 - dt.now().second) if not state["in_transition"] else 5)
 
     # Turn off lights
     print("Turning the lights off...")
