@@ -19,7 +19,7 @@ def index():
 @app.route('/apply', methods=["POST"])
 def apply_rgb():
     data = request.get_json()
-    print(data)
+    app.logger.debug(data)
     settings = load_settings()
     settings["color"] = [trim_range(c, 0, 255) for c in data["color"]]
     apply_color(settings)
@@ -30,7 +30,7 @@ def apply_rgb():
 @app.route('/brightness', methods=["POST"])
 def apply_brightness():
     data = request.get_json()
-    print(data)
+    app.logger.debug(data)
     settings = load_settings()
     settings["brightness"] = trim_range(data["brightness"], 0, 100)
     apply_color(settings)
@@ -41,7 +41,7 @@ def apply_brightness():
 @app.route('/power', methods=["POST"])
 def power_rgb():
     data = request.get_json()
-    print(data)
+    app.logger.debug(data)
     settings = load_settings()
     if settings["on"] != data["on"]:
         settings["on"] = data["on"]
@@ -62,7 +62,7 @@ def preset():
         }
     else:
         data = request.get_json()
-        print(data)
+        app.logger.debug(data)
 
         if request.method == 'POST':
             if not "presets" in settings:
@@ -82,7 +82,7 @@ def preset():
 @app.route('/schedule', methods=["POST"])
 def apply_schedule():
     data = request.get_json()
-    print(data)
+    app.logger.debug(data)
     settings = load_settings()
     props = ["enabled", "on", "off"]
     for p in props:
@@ -96,8 +96,9 @@ def apply_schedule():
 if __name__ == "__main__":
     try:
         start_scheduler()
+        app.logger.info("Scheduler started.")
         settings = load_settings()
         app.run(host=settings["bind-addr"], port=settings["bind-port"])
     finally:
-        print("Waiting for scheduler to quit...")
+        app.logger.info("Waiting for scheduler to quit...")
         stop_scheduler()

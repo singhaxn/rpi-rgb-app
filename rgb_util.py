@@ -5,11 +5,13 @@ import pigpio
 import os
 import re
 from datetime import datetime as dt
+import logging
 
 pi = pigpio.pi()
 settings_lock = threading.RLock()
 scheduler_active = False
 scheduler_thread = None
+logger = logging.getLogger()
 
 TIME_PATTERN = re.compile(r'^(?P<hour>\d\d):(?P<minute>\d\d)$')
 SETTINGS_FILE = "settings/rgb.json"
@@ -82,7 +84,7 @@ def apply_color(settings):
                     state["in_transition"] = True
                 brightness *= ratio
 
-                print("[{3}:{4}] on_ratio = {0}, off_ratio = {1}, brightness={2}".format(on_ratio, off_ratio, brightness, now.hour, now.minute))
+                logger.debug("[{3}:{4}] on_ratio = {0}, off_ratio = {1}, brightness={2}".format(on_ratio, off_ratio, brightness, now.hour, now.minute))
             else:
                 brightness = 0.0
 
@@ -108,7 +110,7 @@ def scheduler_thread():
         time.sleep((65 - dt.now().second) if not state["in_transition"] else 5)
 
     # Turn off lights
-    print("Turning the lights off...")
+    logger.info("Turning the lights off...")
     settings = load_settings()
     settings["brightness"] = 0
     apply_color(settings)
