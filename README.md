@@ -56,11 +56,11 @@ hostname -I
 ```
 Clone this repository
 ```
-git clone --recurse-submodules https://github.com/singhaxn/rgb-app.git
+git clone https://github.com/singhaxn/rpi-rgb-app.git
 ```
 Navigate into your app folder
 ```
-cd rgb-app
+cd rpi-rgb-app
 ```
 See the [App Configuration](#app-configuration) section below and make any changes that may be required for your environment.
 
