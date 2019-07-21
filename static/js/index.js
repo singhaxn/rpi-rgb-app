@@ -12,17 +12,10 @@ var presets = {};
 $(document).ready(
   function() {
     //  Power button
-    var powerButton = $("#btnPower");
-    var powerOn = (powerButton.data("checked").toLowerCase() == "true");
-    if(powerOn) {
-      powerButton.addClass("power-on");
-      $("#settings-container").css('display', "block");
-    } else {
-      powerButton.addClass("power-off");
-      $("#settings-container").css('display', "none");
-    }
-    powerButton.data("checked", powerOn);
-    powerButton.click(togglePower);
+    initializeToggleButton($("#btnPower"), "#settings-container", "on", "/power");
+
+    //  Schedule button
+    initializeToggleButton($("#btnSchedule"), ".schedule", "enabled", "/schedule");
 
     //  Colors
     $("input[type='range'].channel").each(
@@ -61,18 +54,13 @@ $(document).ready(
       }
     });
 
-    //  Schedule
-    var chkSchedule = $("#chkSchedule");
-    var scheduleEnabled = (chkSchedule.data("init-checked").toLowerCase() == "true");
-    chkSchedule.prop("checked", scheduleEnabled);
-    chkSchedule.change(enableSchedule);
-    $("div.schedule").css("display", scheduleEnabled ? "block" : "none");
+    //  Save Schedule
     $("#btnSaveSchedule").click(saveSchedule);
   }
 )
 
 function postJson(url, data) {
-  console.log(data);
+  console.log("Post:", url, data);
 
   $.post({
     url: url,
@@ -127,23 +115,39 @@ function apply(event) {
   postJson("/apply", data);
 }
 
-function togglePower(event) {
-  var btn = $("#btnPower");
-  var data = {};
-  var checked = (btn.data("checked") === true);
+function initializeToggleButton(btn, selector, key, url) {
+  var enabled = (btn.data("checked").toLowerCase() == "true");
 
-  if(checked) {
-    btn.removeClass("power-on").addClass("power-off");
-    $("#settings-container").css('display', "none");
+  if(enabled) {
+    btn.addClass("toggle-on");
+    $(selector).css('display', "block");
   } else {
-    btn.removeClass("power-off").addClass("power-on");
-    $("#settings-container").css('display', "block");
+    btn.addClass("toggle-off");
+    $(selector).css('display', "none");
+  }
+  btn.data("checked", enabled);
+  btn.click(
+    function(event) {
+      toggle($(this), selector, key, url);
+    }
+  );
+}
+
+function toggle(btn, selector, key, url) {
+  var enabled = btn.data("checked");
+  var data = {};
+  data[key] = !enabled;
+
+  if(enabled) {
+    btn.removeClass("toggle-on").addClass("toggle-off");
+    $(selector).css("display", "none");
+  } else {
+    btn.removeClass("toggle-off").addClass("toggle-on");
+    $(selector).css("display", "block");
   }
 
-  btn.data("checked", !checked);
-  data["on"] = !checked;
-
-  postJson("/power", data);
+  btn.data("checked", !enabled);
+  postJson(url, data);
 }
 
 function presetSelected(event) {
@@ -245,16 +249,6 @@ function allValid(validation) {
   }
 
   return true;
-}
-
-function enableSchedule(event) {
-  var enabled = $(this).prop("checked");
-  var data = {
-    "enabled": enabled
-  };
-
-  $("div.schedule").css("display", enabled ? "block" : "none");
-  postJson("/schedule", data);
 }
 
 function saveSchedule(event) {

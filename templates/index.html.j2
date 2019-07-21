@@ -14,7 +14,12 @@
 <body>
   <div id="container">
     <div id="power-container">
-      <input id="btnPower" type="button" class="fa powerbtn" value="&#xf011;" data-checked='{{ settings["on"] }}'></input>
+      <div>
+        <input id="btnPower" type="button" class="fa togglebtn" value="&#xf011;" data-checked='{{ settings["on"] }}'></input>
+      </div>
+      <div>
+        <input id="btnSchedule" type="button" class="fa togglebtn" value="&#xf017;" data-checked='{{ settings["schedule"]["enabled"] }}'></input>
+      </div>
     </div>
     <div id="settings-container">
       <h3>Presets</h3>
@@ -47,10 +52,7 @@
         <input id="rngBrightness" class="brightness" type="range" value="{{ settings.brightness }}" min="0" max="100"></input>
         <input id="txtBrightness" class="brightness" type="text" value="{{ settings.brightness }}" readonly></input>
       </div>
-      <h3>Schedule</h3>
-      <div class="row">
-        <label><input id="chkSchedule" type="checkbox" data-init-checked='{{ settings["schedule"]["enabled"] }}'/>Enabled</label>
-      </div>
+      <h3 class="schedule">Schedule</h3>
       <div class="row schedule">
         <table>
           <tr>

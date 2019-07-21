@@ -51,7 +51,7 @@ div.row {
   display: None;
 }
 
-input[type="button"].powerbtn {
+input[type="button"].togglebtn {
   width: 48px;
   height: 48px;
   font-size: 20pt;
@@ -60,11 +60,11 @@ input[type="button"].powerbtn {
   color: white;
 }
 
-.power-off {
+.toggle-off {
   background-color: #c00 !important;
 }
 
-.power-on {
+.toggle-on {
   background-color: #0c0 !important;
 }
 
@@ -76,6 +76,17 @@ div#container {
 div#power-container {
   margin-bottom: 12px;
   text-align: center;
+}
+
+div#power-container div {
+  width: 48%;
+  display: inline-block;
+}
+
+div#settings-container {
+  /* overflow: auto;
+  border: 1px solid #333;
+  height: 100%; */
 }
 
 select#selPresets {
@@ -104,5 +115,5 @@ input.table-cell {
   width: 80px;
 }
 
-div.schedule {
+.schedule {
 }

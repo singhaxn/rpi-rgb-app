@@ -12,8 +12,6 @@ def add_header(response):
 @app.route('/')
 def index():
     settings = load_settings()
-    # if not "schedule" in settings:
-    #     settings["schedule"] = DEFAULT_SETTINGS["schedule"]
     return render_template("index.html.j2", settings=settings)
 
 @app.route('/apply', methods=["POST"])
@@ -96,9 +94,9 @@ def apply_schedule():
 if __name__ == "__main__":
     try:
         start_scheduler()
-        app.logger.info("Scheduler started.")
         settings = load_settings()
         app.run(host=settings["bind-addr"], port=settings["bind-port"])
+        app.logger.info("Scheduler started.")
     finally:
         app.logger.info("Waiting for scheduler to quit...")
         stop_scheduler()
