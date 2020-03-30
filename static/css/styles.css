@@ -5,6 +5,12 @@ body {
   font-family: sans-serif;
 }
 
+div {
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
 input[type="text"].channel, input[type="text"].brightness {
   width: 32px;
   vertical-align: middle;
@@ -15,11 +21,16 @@ input[type="range"].channel, input[type="range"].brightness {
   vertical-align: middle;
 }
 
-input[type="button"] {
+input[type="button"], input[type="color"] {
   padding: 12px;
   background-color: #888;
   color: white;
   border: 1px solid #666;
+}
+
+label {
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
 div.row {
@@ -31,24 +42,47 @@ div.row {
   border: 1px solid #888;
 }
 
-.preview {
+div.section-header {
+  background-color: inherit;
   text-align: center;
+  vertical-align: middle;
+  margin: 0;
+  border: 0;
 }
 
-.red {
-  background: #844 !important;
+div.section-header > .header-cell {
+  display: table-cell;
+  width: auto;
 }
 
-.green {
-  background: #484 !important;
+div.section-header > .header-cell label {
+  display: inline-block;
+  width: 80%;
 }
 
-.blue {
-  background: #448 !important;
+div.section-header > .ext-cell {
+  display: table-cell;
+  text-align: right;
+  width: 10%;
+}
+
+input[type="button"].header-button {
+  background-color: inherit;
+  color: white;
+  border: 0;
+  font-size: 16pt;
 }
 
 .hidden {
-  display: None;
+  display: none;
+}
+
+.align-left {
+  text-align: left;
+}
+
+.align-right {
+  text-align: right;
 }
 
 input[type="button"].togglebtn {
@@ -89,31 +123,147 @@ div#settings-container {
   height: 100%; */
 }
 
-select#selPresets {
-  width: 100%;
-  background-color: inherit;
-  border: 0;
+div.radio-list, div#divSequence {
+  max-height: 360px;
   overflow: auto;
 }
 
-option.preset {
-  color: white;
-  text-shadow: 1px 1px gray;
-  padding: 8px;
-  text-align: center;
+span.color-preview {
+  display: inline-block;
+  width: 24px;
+  height: 16px;
+  border: 1px solid white;
+  margin-right: 12px;
+}
+
+div.list-item {
+  text-align: left;
+  vertical-align: middle;
+}
+
+label.list-item-label {
+  display: block;
+  width: 90%;
+  vertical-align: middle;
   margin: 4px;
-  font-weight: bold;
+  padding: 4px;
 }
 
-#txtPreset {
-  width: 60%;
+input[type='radio']:checked + label {
+  font-weight: bold;
+  background-color: #666;
+}
+
+div.seq-item-preview {
+  height: 8px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  line-height: 0px;
+  font-size: 0pt;
+}
+
+span.seq-subeffect {
+  display: inline-block;
+  height: 100%;
+  min-width: 1%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+div.table {
+  display: table;
+  width: 100%;
+  padding: 0px;
+  border: 0px;
+  margin: 0px;
+}
+
+div.tr {
+  display: table-row;
+  padding: 0px;
+  border: 0px;
+  margin: 0px;
+}
+
+div.td {
+  display: table-cell;
+  padding: 0px;
+  border: 0px;
+  margin: 0px;
+}
+
+div.visible {
+  display: inherit;
+}
+
+input.time {
+  width: 40px;
+}
+
+.schedule {}
+.color {}
+.sequence {}
+
+input#cpkColor {
+  padding: 4px;
+  height: 32px;
+  width: 32px;
+  margin: 0px;
+  vertical-align: middle;
+}
+
+input#txtColor, input#txtSequence {
+  width: 50%;
+  height: 32px;
+  min-width: 64px;
+}
+
+div#divPreview {
+  margin-top: 8px;
+  height: 12px;
+}
+
+div.sequence-list-item {
+  margin: 4px;
+  margin-bottom: 8px;
+  padding: 4px;
+  padding-right: 0px;
+  text-align: left;
+  background-color: #333;
+}
+
+div.sequence-list-item input.effect-duration {
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 64px;
+  vertical-align: top;
+  text-align: right;
+  font-family: courier;
+  font-size: 10pt;
+}
+
+div.sequence-list-item select {
+  /*max-width: 80px;*/
+  width: 120px;
+}
+
+div.sequence-list-item input.action-button {
+  background-color: inherit;
   padding: 8px;
-  font-weight: bold;
+  border: 0;
 }
 
-input.table-cell {
-  width: 80px;
+div.sequence-list-item div.effect-def {
+  text-align: left;
+  margin-bottom: 4px;
 }
 
-.schedule {
+div.sequence-list-item div.handle {
+  vertical-align: middle;
+  padding-left: 4px;
+  padding-right: 4px;
+  font-size: 8pt;
 }

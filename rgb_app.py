@@ -1,8 +1,21 @@
 from flask import Flask, render_template, request
+import os
+import sys
 import json
-from rgb_util import *
+import signal
+from config import Config
+from renderer import Renderer
+import logging
+
+# To enable debug logging: export FLASK_ENV=development
+os.environ["FLASK_ENV"] = "development"
+# os.environ["FLASK_ENV"] = "production"
 
 app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG if os.environ["FLASK_ENV"] == "development" else logging.INFO)
+
+config = Config("config/settings.json")
+renderer = Renderer(config)
 
 @app.after_request
 def add_header(response):
@@ -11,17 +24,44 @@ def add_header(response):
 
 @app.route('/')
 def index():
-    settings = load_settings()
-    return render_template("index.html.j2", settings=settings)
+    return render_template("index.html.j2", settings=config.get())
 
-@app.route('/apply', methods=["POST"])
-def apply_rgb():
+@app.route('/coloreditor')
+def color_editor():
+    return render_template("edit_color.html.j2", settings=config.get())
+
+@app.route('/sequenceeditor')
+def sequence_editor():
+    return render_template("edit_sequence.html.j2", settings=config.get())
+
+@app.route('/power', methods=["POST"])
+def set_power():
+    data = request.get_json()
+    settings = config.get()
+    app.logger.debug(data)
+    if settings["on"] != data["on"]:
+        config.setOn(data["on"])
+        renderer.applySettings()
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/mode', methods=["POST"])
+def set_mode():
     data = request.get_json()
     app.logger.debug(data)
-    settings = load_settings()
-    settings["color"] = [trim_range(c, 0, 255) for c in data["color"]]
-    apply_color(settings)
-    save_settings(settings)
+    settings = config.get()
+    if settings["mode"] != data["mode"]:
+        config.setMode(data["mode"])
+        renderer.applySettings()
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/schedule', methods=["POST"])
+def set_schedule():
+    data = request.get_json()
+    app.logger.debug(data)
+    config.setSchedule(data["schedule"])
+    renderer.applySettings()
 
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
@@ -29,74 +69,70 @@ def apply_rgb():
 def apply_brightness():
     data = request.get_json()
     app.logger.debug(data)
-    settings = load_settings()
-    settings["brightness"] = trim_range(data["brightness"], 0, 100)
-    apply_color(settings)
-    save_settings(settings)
+    config.setBrightness(data["brightness"])
+    renderer.applySettings(resetEffect=False)
 
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
-@app.route('/power', methods=["POST"])
-def power_rgb():
-    data = request.get_json()
-    app.logger.debug(data)
-    settings = load_settings()
-    if settings["on"] != data["on"]:
-        settings["on"] = data["on"]
-        apply_color(settings)
-        save_settings(settings)
-
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
-
-@app.route('/preset', methods=["GET", "POST", "DELETE"])
-def preset():
-    status = None
-    settings = load_settings()
-
-    if request.method == 'GET':
-        status = {
-            "success": True,
-            "presets": settings["presets"] if "presets" in settings else {}
-        }
-    else:
-        data = request.get_json()
-        app.logger.debug(data)
-
-        if request.method == 'POST':
-            if not "presets" in settings:
-                settings["presets"] = {}
-            settings["presets"][data["preset"]] = [
-                trim_range(c, 0, 255) for c in data["color"]
-            ]
-            save_settings(settings)
-            status = {'success': True}
-        elif request.method == "DELETE":
-            if data["preset"] in settings["presets"]:
-                del settings["presets"][data["preset"]]
-                save_settings(settings)
+@app.route('/effects', methods=["GET"])
+def effects():
+    settings = config.get()
+    effects = { key: (settings[key] if key in settings else []) for key in ["colors", "sequences", "effect"] }
+    status = {
+        "success": True,
+        "effects": effects
+    }
 
     return json.dumps(status), 200, {'ContentType':'application/json'}
 
-@app.route('/schedule', methods=["POST"])
-def apply_schedule():
+@app.route('/colors', methods=["POST", "DELETE"])
+def edit_colors():
     data = request.get_json()
     app.logger.debug(data)
-    settings = load_settings()
-    props = ["enabled", "on", "off"]
-    for p in props:
-        if p in data:
-            settings["schedule"][p] = data[p]
-    apply_color(settings)
-    save_settings(settings)
+    if request.method == 'POST':
+        for key, value in data["colors"].items():
+            config.setColor(key, value);
+    else:
+        for key in data["colors"]:
+            config.deleteColor(key);
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/sequences', methods=["POST", "DELETE"])
+def edit_sequences():
+    data = request.get_json()
+    app.logger.debug(data)
+    if request.method == 'POST':
+        for key, value in data["sequences"].items():
+            config.setSequence(key, value);
+    else:
+        for key in data["sequences"]:
+            config.deleteSequence(key);
+
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+
+@app.route('/apply', methods=["POST"])
+def apply_effect():
+    data = request.get_json()
+    settings = config.get()
+    app.logger.debug(data)
+    config.setEffect(data["effect"])
+    renderer.applySettings()
 
     return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 if __name__ == "__main__":
+    def sigtermReceived(signum, frame):
+        app.logger.info("Received SIGTERM. Stopping renderer...")
+        renderer.stop()
+
     try:
-        start_scheduler()
-        settings = load_settings()
-        app.run(host=settings["bind-addr"], port=settings["bind-port"])
-        app.logger.info("Scheduler started.")
+        renderer.start()
+        signal.signal(signal.SIGTERM, sigtermReceived)
+        app.logger.info("Renderer started")
+        settings = config.get()
+        app.run(host=settings["bind-addr"], port=settings["bind-port"], use_reloader=False)
+        app.logger.info("App stopped")
     finally:
-        app.logger.info("Waiting for scheduler to quit...")
-        stop_scheduler()
+        app.logger.info("Waiting for renderer to quit...")
+        renderer.stop()

@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <title>Pi RGB - Color Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" href="static/images/icons-32.png" />
+  <link rel="stylesheet" href="static/css/styles.css"/>
+  <link rel="stylesheet" href="static/fontawesome-free/css/all.min.css"/>
+  <script src="static/js/jquery-3.4.1.min.js"></script>
+  <script src="static/js/common.js"></script>
+  <script src="static/js/edit-color.js"></script>
+</head>
+<body>
+  <!--
+    arrow-left: f060
+    arrow-circle-left: f0a8
+    arrow-circle-o-left: f190
+    angle-left: f104
+    chevron-left: f053
+    floppy: f0c7
+    trash: f1f8
+    trash-o: f014
+    minus: f068
+    plus: f067
+    plus-circle: f055
+    minus-circle: f056
+  -->
+  <div id="container">
+    <div class="section-header">
+      <div class="ext-cell">
+        <input id="btnBack" type="button" class="fa header-button" value="&#xf060;"></input>
+      </div>
+      <div class="header-cell"><h3>Colors</h3></div>
+    </div>
+    <div class="row">
+      <div id="divColorSelect" class="radio-list"></div>
+      <template id="tmpColorOption">
+        <div class="list-item">
+          <input type="radio" name="grpColor" class="hidden"></input>
+          <label class="list-item-label"><span class="color-preview"></span></label>
+        </div>
+      </template>
+    </div>
+    <div class="row">
+      <!-- <input type="color" id="html5colorpicker" onchange="clickColor(0, -1, -1, 5)" value="#ff0000" style="width:85%;"> -->
+      <input id="cpkColor" type="color"></input>
+      <input id="txtColor" type="text" placeholder="Color name (eg. white)"></input>
+      <input id="btnSave" type="button" class="fa" value="&#xf0c7;"></input>
+      <input id="btnDelete" type="button" class="fa" value="&#xf1f8;"></input>
+    </div>
+  </div>
+</body>
+</html>

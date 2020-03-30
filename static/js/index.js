@@ -1,219 +1,165 @@
-var CHANNELS = [
-  {"range": "#rngR", "text": "#txtR"},
-  {"range": "#rngG", "text": "#txtG"},
-  {"range": "#rngB", "text": "#txtB"}
-];
-var PRESET_NAME_PATTERN = /^[a-zA-Z][a-zA-Z0-9_-]*$/;
-var TIME_PATTERN = /^(\d\d):(\d\d)$/;
-var MINUTES_PATTERN = /^\d+$/;
-
-var presets = {};
+const TIME_PATTERN = /^(\d\d):(\d\d)$/;
+const MINUTES_PATTERN = /^\d+$/;
+var effects = null;
 
 $(document).ready(
   function() {
+    var animation = {
+      duration: 0,
+      easing: "swing"
+    };
     //  Power button
-    initializeToggleButton($("#btnPower"), "#settings-container", "on", "/power");
+    initializeToggleButton($("#btnPower"), ["#settings-container", "#btnSchedule"], "on", "/power", {false: false, true: true}, animation);
 
     //  Schedule button
-    initializeToggleButton($("#btnSchedule"), ".schedule", "enabled", "/schedule");
-
-    //  Colors
-    $("input[type='range'].channel").each(
-      function(index, element) {
-        updateChannel($(element));
-      }
-    );
-    $("input[type='range'].channel").change(
-      function(event) {
-        updateChannel($(event.target));
-      }
-    );
-    $("#btnApply").click(apply);
+    initializeToggleButton($("#btnSchedule"), [".schedule"], "mode", "/mode", {false: "manual", true: "schedule"}, animation);
 
     //  Brightness
-    $("#rngBrightness").change(
-      function(event) {
-        updateBrightness($(event.target));
-      }
-    )
-
-    //  Presets
-    $("#selPresets").change(presetSelected);
-    $("#btnSave").click(savePreset);
-    $("#btnDelete").click(deletePreset);
-
-    $.get({
-      url: "/preset",
-      dataType: "json",
-      success: function (data) {
-        var selPresets = $("#selPresets");
-        presets = data["presets"];
-        for(p in presets) {
-          selPresets.append(createPresetOption(p, presets[p]));
-        }
-      }
-    });
+    $("#rngBrightness").change(updateBrightness);
 
     //  Save Schedule
     $("#btnSaveSchedule").click(saveSchedule);
+
+    //  Color
+    $("#rdoColor").change(
+      function(event) {
+        $(".color").slideDown(animation);
+        $(".sequence").slideUp(animation);
+        applyEffect($(event.target).data("active"), $(event.target));
+      }
+    );
+
+    $("#btnColorEdit").click(navigateTo("/coloreditor"));
+    $("#btnSequenceEdit").click(navigateTo("/sequenceeditor"));
+
+    //  Sequence
+    $("#rdoSequence").change(
+      function(event) {
+        $(".color").slideUp(animation);
+        $(".sequence").slideDown(animation);
+        var effect = $(event.target).data("active");
+        applyEffect(effect, $(event.target));
+
+        if (effect && effects.getType(effect) == "loop")
+          $("#chkLoop").prop("checked", true);
+      }
+    );
+
+    $("#chkLoop").change(
+      function(event) {
+        var rdoSequence = $("#rdoSequence");
+        var sequence = $('input[name="grpSequence"]:checked');
+        var effect = null;
+
+        if (sequence.length > 0) {
+          if ($(event.target).prop("checked"))
+            effect = { "effecttype": "loop", "sequence": sequence[0].value };
+          else
+            effect = { "id": ["sequences", sequence[0].value] };
+
+          applyEffect(effect, rdoSequence);
+        }
+      }
+    );
+
+    $.get({
+      url: "/effects",
+      dataType: "json",
+      success: function (data) {
+        console.log(data);
+        var presets = data["effects"];
+        effects = new Effects(presets);
+
+        var colors = presets["colors"];
+        var sequences = presets["sequences"];
+        var effect = presets["effect"];
+        var rdoColor = $("#rdoColor");
+        var rdoSequence = $("#rdoSequence");
+        var colorsContainer = $("#divColorSelect");
+        var sequencesContainer = $("#divSequenceSelect");
+
+        for(var ckey in colors) {
+          var option = createColorOption(ckey, colors[ckey], effects, applyColor);
+          colorsContainer.append(option);
+        }
+
+        for(var skey in sequences) {
+          var option = createSequenceOption(skey, sequences[skey], effects, applySequence);
+          sequencesContainer.append(option);
+        }
+
+        var effectType = effects.getType(effect);
+        var typeRadio = (effectType == "solid") ? rdoColor : rdoSequence;
+        typeRadio.prop("checked", true).change();
+
+        var effectId = effects.getId(effect);
+        if (effectId) {
+          var listname = typeRadio.data("listname");
+          var effectRadios = $('input[name="' + listname + '"]');
+
+          for(var ei = 0; ei < effectRadios.length; ei++) {
+            if (effectRadios[ei].value == effectId[1]) {
+              $(effectRadios[ei]).prop("checked", true);
+              break;
+            }
+          }
+        }
+
+        $("#chkLoop").prop("checked", effectType == "loop");
+
+        applyEffect(effect, typeRadio, false);
+
+        animation.duration = 500;
+      }
+    });
   }
 )
 
-function postJson(url, data) {
-  console.log("Post:", url, data);
-
-  $.post({
-    url: url,
-    data: JSON.stringify(data),
-    dataType: "json",
-    contentType: 'application/json'
-  });
-}
-
-function createPresetOption(name, color) {
-  var option = $(new Option(name, name));
-  option.css("background-color", "rgb(" + color.join(",") + ")");
-  option.addClass("preset");
-  return option;
-}
-
-function getColor() {
-  var color = [0, 0, 0];
-  $("input[type='range'].channel").each(
-    function(index, element) {
-      var jelement = $(element);
-      color[parseInt(jelement.data("index"))] = parseInt(jelement.val());
-    }
-  );
-
-  return color;
-}
-
-function updateChannel(target) {
-  var index = parseInt(target.data("index"));
-  var channel = CHANNELS[index];
-  var value = target.val();
-  var color = getColor();
-
-  $(channel["text"]).val(value);
-  $(".preview").css("background-color", "rgb(" + color.join(",") + ")");
-}
-
-function updateBrightness(target) {
-  var value = parseInt(target.val());
-
-  $("#txtBrightness").val(value);
-  postJson("/brightness", {brightness: value});
-}
-
-function apply(event) {
-  var color = getColor();
-
-  var data = {
-    color: color
-  };
-  postJson("/apply", data);
-}
-
-function initializeToggleButton(btn, selector, key, url) {
+function initializeToggleButton(btn, selector, key, url, values, animation) {
   var enabled = (btn.data("checked").toLowerCase() == "true");
 
   if(enabled) {
     btn.addClass("toggle-on");
-    $(selector).css('display', "block");
+    for (var i=0; i<selector.length; i++)
+      $(selector[i]).slideDown(animation);
   } else {
     btn.addClass("toggle-off");
-    $(selector).css('display', "none");
+    for (var i=0; i<selector.length; i++)
+      $(selector[i]).slideUp(animation);
   }
   btn.data("checked", enabled);
   btn.click(
     function(event) {
-      toggle($(this), selector, key, url);
+      toggle($(this), selector, key, url, values, animation);
     }
   );
 }
 
-function toggle(btn, selector, key, url) {
+function toggle(btn, selector, key, url, values, animation) {
   var enabled = btn.data("checked");
   var data = {};
-  data[key] = !enabled;
+  data[key] = values[!enabled];
 
   if(enabled) {
     btn.removeClass("toggle-on").addClass("toggle-off");
-    $(selector).css("display", "none");
+    for (var i=0; i<selector.length; i++)
+      $(selector[i]).slideUp(animation);
   } else {
     btn.removeClass("toggle-off").addClass("toggle-on");
-    $(selector).css("display", "block");
+    for (var i=0; i<selector.length; i++)
+      $(selector[i]).slideDown(animation);
   }
 
   btn.data("checked", !enabled);
   postJson(url, data);
 }
 
-function presetSelected(event) {
-  var value = $(this).val();
-  var preset = presets[value];
-  console.log(value, preset);
+function updateBrightness(event) {
+  var target = $(event.target);
+  var value = parseInt(target.val());
 
-  $("input[type='range'].channel").each(
-    function(index, element) {
-      var jelement = $(element);
-      jelement.val(preset[parseInt(jelement.data("index"))]).change();
-    }
-  );
-
-  $("#txtPreset").val(value);
-  apply();
-}
-
-function savePreset(event) {
-  var name = $("#txtPreset").val();
-
-  if(!name.match(PRESET_NAME_PATTERN))
-    alert("Error: Profile name must match the pattern " + PRESET_NAME_PATTERN);
-  else {
-    var color = getColor();
-    var data = {
-      "preset": name,
-      "color": color
-    };
-    var selPresets = $("#selPresets");
-
-    if (name in presets) {
-      presets[name] = color;
-      var option = selPresets.children('[value="' + name + '"]');
-      option.css("background-color", "rgb(" + color.join(",") + ")");
-    } else {
-      presets[name] = color;
-      selPresets.append(createPresetOption(name, color));
-    }
-
-    postJson("/preset", data);
-  }
-}
-
-function deletePreset(event) {
-  var name = $("#txtPreset").val();
-
-  if(name in presets) {
-    delete presets[name];
-    var data = {
-      "preset": name
-    };
-
-    $("#selPresets").children('[value="' + name + '"]').remove();
-
-    console.log(data);
-
-    $.ajax({
-      url: "/preset",
-      method: "DELETE",
-      data: JSON.stringify(data),
-      dataType: "json",
-      contentType: 'application/json'
-    });
-  } else
-    alert("Error: Unknown preset '" + name + "'");
+  $("#txtBrightness").val(value);
+  postJson("/brightness", {brightness: value});
 }
 
 function isValidTime(t) {
@@ -253,29 +199,49 @@ function allValid(validation) {
 
 function saveSchedule(event) {
   var onTime = $("#txtOnTime").val();
-  var onTransition = $("#txtOnTransition").val();
   var offTime = $("#txtOffTime").val();
-  var offTransition = $("#txtOffTransition").val();
   var validation = [
       [isValidTime(onTime), "on time"],
       [isValidTime(offTime), "off time"],
-      [isValidNumber(onTransition, 0, 480), "on transition"],
-      [isValidNumber(offTransition, 0, 480), "off transition"],
     ];
 
   if(!allValid(validation))
     return;
 
   var data = {
-    "on": {
-      "time": onTime,
-      "transition": parseInt(onTransition)
-    },
-    "off": {
-      "time": offTime,
-      "transition": parseInt(offTransition)
+    "schedule": {
+      "on": onTime,
+      "off": offTime,
     }
   };
 
   postJson("/schedule", data);
+}
+
+function applyColor(event) {
+  var radio = $(event.target);
+  var effect = { "id": ["colors", radio.val()] };
+  applyEffect(effect, $("#rdoColor"));
+}
+
+function applySequence(event) {
+  var radio = $(event.target);
+  var loop = $("#chkLoop").prop("checked");
+  var effect;
+
+  if (loop === true) {
+    effect = { "effecttype": "loop", "sequence": radio.val() };
+  } else {
+    effect = { "id": ["sequences", radio.val()] };
+  }
+
+  applyEffect(effect, $("#rdoSequence"));
+}
+
+function applyEffect(effect, control, post=true) {
+  if (effect) {
+    control.data("active", effect);
+    if (post)
+      postJson("/apply", {"effect": effect});
+  }
 }

@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <title>Pi RGB - Sequence Editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/static/manifest.json">
+  <link rel="icon" type="image/png" href="static/images/icons-32.png" />
+  <link rel="stylesheet" href="static/css/styles.css"/>
+  <link rel="stylesheet" href="static/css/jquery-ui.min.css"/>
+  <link rel="stylesheet" href="static/fontawesome-free/css/all.min.css"/>
+  <script src="static/js/jquery-3.4.1.min.js"></script>
+  <script src="static/js/jquery-ui.min.js"></script>
+  <script src="static/js/jquery.ui.touch-punch.min.js"></script>
+  <script src="static/js/common.js"></script>
+  <script src="static/js/edit-sequence.js"></script>
+</head>
+<body>
+  <!--
+    arrow-left: f060
+    arrow-circle-left: f0a8
+    arrow-circle-o-left: f190
+    angle-left: f104
+    chevron-left: f053
+    floppy: f0c7
+    trash: f1f8
+    trash-o: f014
+    minus: f068
+    times (cross/close): f00d
+    plus: f067
+    plus-circle: f055
+    minus-circle: f056
+    play-circle: f144
+    play: f04b
+    file: f15b
+  -->
+  <div id="container">
+    <div class="section-header">
+      <div class="ext-cell">
+        <input id="btnBack" type="button" class="fa header-button" value="&#xf060;"></input>
+      </div>
+      <div class="header-cell"><h3>Sequences</h3></div>
+    </div>
+    <div class="row">
+      <div id="divSequenceSelect" class="radio-list"></div>
+      <template id="tmpSequenceOption">
+        <div class="list-item">
+          <input type="radio" name="grpSequence" class="hidden"></input>
+          <label class="list-item-label">
+            <div class="seq-item-name"></div>
+            <div class="seq-item-preview"></div>
+          </label>
+        </div>
+      </template>
+    </div>
+    <div class="section-header">
+      <div class="header-cell"><h3></h3></div>
+    </div>
+    <div class="row">
+      <input id="btnNew" type="button" class="fa" value="&#xf15b;"></input>
+      <input id="txtSequence" type="text" placeholder="Sequence name (eg. rainbow)"></input>
+      <input id="btnSave" type="button" class="fa" value="&#xf0c7;"></input>
+      <input id="btnDelete" type="button" class="fa" value="&#xf1f8;"></input>
+      <div id="divPreview" class="seq-item-preview"></div>
+    </div>
+    <div class="row">
+      <div id="divSequence"></div>
+      <!-- Drag-drop example: https://jqueryui.com/sortable/ -->
+      <template id="tmpEffect">
+        <div class="sequence-list-item">
+          <div class="table">
+            <div class="tr">
+              <div class="td handle">
+                <!--
+                fa-arrows-v
+                fa-ellipsis-v
+                fa-bars
+                -->
+                <span class="fa fa-bars"></span>
+
+              </div>
+              <div class="td">
+                <input type="text" class="effect-duration"/>
+              </div>
+              <div class="td">
+                <div class="effect-def">
+                  <select class="effect-type" value="solid">
+                    <option value="solid">solid</option>
+                    <option value="transition">transition</option>
+                  </select>
+                </div>
+                <div class="effect-def">
+                  <select class="effect-color"></select>
+                </div>
+              </div>
+              <div class="td align-right">
+                <input type="button" class="fa action-button" name="delete" value="&#xf00d;"></input>
+              </div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+    <div class="row">
+      <div id="divListOperations" class="table">
+        <div class="tr">
+          <div class="td align-left">
+            <input id="btnAddEffect" type="button" class="fa" value="&#xf067;"/>
+          </div>
+          <div class="td align-right">
+            <input id="chkLoop" type="checkbox"/></input>
+            <label for="chkLoop">Loop</label>
+            <input id="btnPlay" type="button" class="fa" value="&#xf04b;"></input>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

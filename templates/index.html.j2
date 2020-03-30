@@ -9,71 +9,106 @@
   <link rel="stylesheet" href="static/css/styles.css"/>
   <link rel="stylesheet" href="static/fontawesome-free/css/all.min.css"/>
   <script src="static/js/jquery-3.4.1.min.js"></script>
+  <script src="static/js/common.js"></script>
   <script src="static/js/index.js"></script>
 </head>
 <body>
+  <!--
+    check / tick: f00c
+    check-circle: f058
+    check-circle-o: f05d
+    check-square: f14a
+    check-square-o: f046
+    calendar-check-o: f274
+    floppy: f0c7
+
+    ellipsis-h: f141
+    ellipsis-v: f142
+    cog: f013
+  -->
   <div id="container">
     <div id="power-container">
       <div>
         <input id="btnPower" type="button" class="fa togglebtn" value="&#xf011;" data-checked='{{ settings["on"] }}'></input>
       </div>
       <div>
-        <input id="btnSchedule" type="button" class="fa togglebtn" value="&#xf017;" data-checked='{{ settings["schedule"]["enabled"] }}'></input>
+        <input id="btnSchedule" type="button" class="fa togglebtn" value="&#xf017;" data-checked='{{ settings["mode"] == "schedule" }}'></input>
       </div>
     </div>
+
     <div id="settings-container">
-      <h3>Presets</h3>
-      <div class="row">
-        <select id="selPresets" size="8"></select>
+      <div class="row section-header">
+        <h3>Brightness</h3>
       </div>
       <div class="row">
-        <input id="txtPreset" type="text"></select>
-        <input id="btnSave" type="button" class="fa" value="&#xf0c7;"></select>
-        <input id="btnDelete" type="button" class="fa" value="&#xf2ed;"></select>
+        <input id="rngBrightness" class="brightness" type="range" value="{{ settings['brightness'] }}" min="0" max="100" step="5"></input>
+        <input id="txtBrightness" class="brightness" type="text" value="{{ settings['brightness'] }}" readonly></input>
       </div>
-      <h3>Color</h3>
-      <div class="row red">
-        <input id="rngR" class="channel" type="range" value="{{ settings.color[0] }}" min="0" max="255" data-index="0"></input>
-        <input id="txtR" class="channel" type="text" value="{{ settings.color[0] }}" readonly></input>
-      </div>
-      <div class="row green">
-        <input id="rngG" class="channel" type="range" value="{{ settings.color[1] }}" min="0" max="255" data-index="1"></input>
-        <input id="txtG" class="channel" type="text" value="{{ settings.color[1] }}" readonly></input>
-      </div>
-      <div class="row blue">
-        <input id="rngB" class="channel" type="range" value="{{ settings.color[2] }}" min="0" max="255" data-index="2"></input>
-        <input id="txtB" class="channel" type="text" value="{{ settings.color[2] }}" readonly></input>
-      </div>
-      <div class="row preview">
-        <input id="btnApply" type="button" value="Apply"></input>
-      </div>
-      <h3>Brightness</h3>
-      <div class="row">
-        <input id="rngBrightness" class="brightness" type="range" value="{{ settings.brightness }}" min="0" max="100"></input>
-        <input id="txtBrightness" class="brightness" type="text" value="{{ settings.brightness }}" readonly></input>
-      </div>
-      <h3 class="schedule">Schedule</h3>
-      <div class="row schedule">
-        <table>
-          <tr>
-            <th>Event</th>
-            <th>Time (hh:mm)</th>
-            <th>Transition (minutes)</th>
-          </tr>
-          <tr>
-            <td>On</td>
-            <td><input id="txtOnTime" class="table-cell" type="text" value='{{ settings["schedule"]["on"]["time"] }}'/></td>
-            <td><input id="txtOnTransition" class="table-cell" type="text" value='{{ settings["schedule"]["on"]["transition"] }}'/></td>
-          </tr>
-          <tr>
-            <td>Off</td>
-            <td><input id="txtOffTime" class="table-cell" type="text" value='{{ settings["schedule"]["off"]["time"] }}'/></td>
-            <td><input id="txtOffTransition" class="table-cell" type="text" value='{{ settings["schedule"]["off"]["transition"] }}'/></td>
-          </tr>
-        </table>
+
+      <div class="row section-header schedule">
+        <h3>Schedule</h3>
       </div>
       <div class="row schedule">
-        <input id="btnSaveSchedule" type="button" value="Save"></input>
+        <div class="table">
+          <div class="tr">
+            <div class="td">
+              <label for="txtOnTime">On</label>
+              <input id="txtOnTime" class="time" type="text" value='{{ settings["schedule"]["on"] }}'/></input>
+            </div>
+            <div class="td">
+              <label for="txtOffTime">Off</label>
+              <input id="txtOffTime" class="time" type="text" value='{{ settings["schedule"]["off"] }}'/></input>
+            </div>
+            <div class="td">
+              <input id="btnSaveSchedule" type="button" class="fa header-button" value="&#xf058;"></input>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="ext-cell">
+          <input id="rdoColor" type="radio" name="grpEffectType" data-listname="grpColor"></input>
+        </div>
+        <div class="header-cell"><h3><label for="rdoColor">Color</label></h3></div>
+        <div class="ext-cell">
+          <input id="btnColorEdit" type="button" class="fa header-button" value="&#xf013;"></input>
+        </div>
+      </div>
+      <div class="row color">
+        <div id="divColorSelect" class="radio-list"></div>
+        <template id="tmpColorOption">
+          <div class="list-item">
+            <input type="radio" name="grpColor" class="hidden"></input>
+            <label class="list-item-label"><span class="color-preview"></span></label>
+          </div>
+        </template>
+      </div>
+
+      <div class="section-header">
+        <div class="ext-cell">
+          <input id="rdoSequence" type="radio" name="grpEffectType" data-listname="grpSequence"></input>
+        </div>
+        <div class="header-cell"><h3><label for="rdoSequence">Sequence</label></h3></div>
+        <div class="ext-cell">
+          <input id="btnSequenceEdit" type="button" class="fa header-button" value="&#xf013;"></input>
+        </div>
+      </div>
+      <div class="row sequence">
+        <div id="divSequenceSelect" class="radio-list"></div>
+        <template id="tmpSequenceOption">
+          <div class="list-item">
+            <input type="radio" name="grpSequence" class="hidden"></input>
+            <label class="list-item-label">
+              <div class="seq-item-name"></div>
+              <div class="seq-item-preview"></div>
+            </label>
+          </div>
+        </template>
+      </div>
+      <div class="row sequence">
+        <input type="checkbox" id="chkLoop"></input>
+        <label for="chkLoop">Loop</label>
       </div>
     </div>
   </div>
