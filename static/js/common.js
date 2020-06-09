@@ -228,24 +228,31 @@ function createSequenceOption(name, seqEffect, effects, applySequence) {
 }
 
 function buildSequencePreview(seq, effects, preview) {
-  var duration = 0;
+  var realDuration = 0;
   var n0 = 0;
+  var black = [0, 0, 0];
 
   for(var ei = 0; ei < seq.length; ei++) {
     var d = seq[ei]["duration"];
-    if (d == 0)
-      n0++;
-    duration += d;
+    realDuration += d;
   }
 
-  var black = [0, 0, 0];
+  var duration = realDuration;
+  for(var ei = 0; ei < seq.length; ei++) {
+    if(seq[ei]["duration"] / realDuration < 0.01) {
+      duration = duration - seq[ei]["duration"];
+      n0++;
+    }
+  }
+
   preview.empty();
   for(var ei = 0; ei < seq.length; ei++) {
     var e = seq[ei];
     var span = $("<span/>");
     span.addClass("seq-subeffect");
-    // span.css("width", Math.floor(e["duration"] / duration * (100 - n0)) + "%");
-    span.css("width", (e["duration"] / duration * (100 - n0)) + "%");
+    // span.css("width", (spanWidth[ei] / visualDuration * 100) + "%");
+    var d = e["duration"] / duration;
+    span.css("width", (d < 0.01 ? 1 : (d * (100 - n0))) + "%");
     if("effecttype" in e) {
       if(e["effecttype"] == "solid") {
         var color = effects.getColor(e) || black;
@@ -261,7 +268,7 @@ function buildSequencePreview(seq, effects, preview) {
     preview.append(span);
   }
 
-  return duration;
+  return realDuration;
 }
 
 function navigateTo(url) {

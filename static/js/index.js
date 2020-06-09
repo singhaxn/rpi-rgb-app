@@ -94,15 +94,9 @@ $(document).ready(
 
         var effectId = effects.getId(effect);
         if (effectId) {
-          var listname = typeRadio.data("listname");
-          var effectRadios = $('input[name="' + listname + '"]');
-
-          for(var ei = 0; ei < effectRadios.length; ei++) {
-            if (effectRadios[ei].value == effectId[1]) {
-              $(effectRadios[ei]).prop("checked", true);
-              break;
-            }
-          }
+          var radio = $("#" + effects.getControlId(effectId));
+          radio.prop("checked", true);
+          radio.next()[0].scrollIntoView();
         }
 
         $("#chkLoop").prop("checked", effectType == "loop");

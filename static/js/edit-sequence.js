@@ -294,7 +294,9 @@ function reloadSequences() {
       if (effectType == "sequence" || effectType == "loop") {
         var effectId = effects.getId(effect);
         if (effectId) {
-          $("#" + effects.getControlId(effectId)).prop("checked", true);
+          var radio = $("#" + effects.getControlId(effectId));
+          radio.prop("checked", true);
+          radio.next()[0].scrollIntoView();
           $("#txtSequence").val(effectId[1]);
           loadSequenceById(effectId[1]);
         } else {

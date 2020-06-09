@@ -37,7 +37,9 @@ function reloadColors() {
       if (effectType == "solid") {
         var effectId = effects.getId(effect);
         if (effectId) {
-          $("#" + effects.getControlId(effectId)).prop("checked", true);
+          var radio = $("#" + effects.getControlId(effectId));
+          radio.prop("checked", true);
+          radio.next()[0].scrollIntoView();
           $("#txtColor").val(effectId[1]);
         }
 
