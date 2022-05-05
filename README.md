@@ -19,7 +19,7 @@ If you intend to run only this app on your RPi, the Lite image on a RPi Zero, sh
 The following instructions assume that the red, green and blue channels are being controlled by GPIO23, GPIO24 and GPIO25, respectively. Please make adjustments, as appropriate for your environment.
 
 ### Hardware connections
-
+ 
 The pin layout shown here is for a 1st generation RPi. Please check the layout for your version, before connecting.
 
 ![alt text](./connections.png "Connections")
@@ -81,6 +81,10 @@ In a web browser, on any device on your local network (same network as the RPi),
 ![alt text](rgb-app-ui.png "UI")
 
 If not, see the [Troubleshooting](#troubleshooting) section below.
+
+The gear icons can be used to edit colors and effects:
+
+![alt text](rgb_sequence_editor.png "Sequence editor")
 
 To get the RGB app to start up automatically at boot, add the following line to your `/etc/rc.local`, before the `exit 0` line.
 ```
