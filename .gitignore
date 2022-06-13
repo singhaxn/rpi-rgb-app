@@ -3,3 +3,4 @@ config/
 *.bak
 temp.*
 backup/
+.lgd*

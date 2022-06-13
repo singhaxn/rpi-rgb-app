@@ -2,7 +2,8 @@ from threading import Thread, Condition
 import re
 from datetime import datetime as dt
 from effects import ConfigEffectTransformer
-import hardware
+# import hardware_pigpio as hardware
+import hardware_lgpio as hardware
 
 TIME_PATTERN = re.compile(r'^(?P<hour>\d\d):(?P<minute>\d\d)$')
 
