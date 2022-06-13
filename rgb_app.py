@@ -8,11 +8,11 @@ from renderer import Renderer
 import logging
 
 # To enable debug logging: export FLASK_ENV=development
-os.environ["FLASK_ENV"] = "development"
+# os.environ["FLASK_ENV"] = "development"
 # os.environ["FLASK_ENV"] = "production"
 
 app = Flask(__name__)
-app.logger.setLevel(logging.DEBUG if os.environ["FLASK_ENV"] == "development" else logging.INFO)
+app.logger.setLevel(logging.DEBUG if os.getenv("FLASK_ENV", "production") == "development" else logging.INFO)
 
 config = Config("config/settings.json")
 renderer = Renderer(config)

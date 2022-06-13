@@ -1,13 +1,13 @@
 [Unit]
 Description=Web service to allow control of an RGB led strip connected via GPIO
+After=network.target
 
 [Service]
+# Specify your username
 User=pi
-# The configuration file application.properties should be here:
-# change this to your workspace
+# Location of the rpi-rgb-app repository
 WorkingDirectory=/home/pi/src/rpi-rgb-app
-# path to executable
-ExecStart=python3 /home/pi/src/rpi-rgb-app/rgb_app.py
+ExecStart=python3 rgb_app.py
 SuccessExitStatus=143
 TimeoutStopSec=10
 Restart=on-failure
@@ -15,4 +15,3 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-After=network.target
