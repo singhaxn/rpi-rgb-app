@@ -12,8 +12,12 @@ except ModuleNotFoundError:
         import hardware_lgpio as hardware
         print("Using lgpio")
     except ModuleNotFoundError:
-        print("pigpio or lgpio must be installed", file=sys.stderr)
-        sys.exit(1)
+        try:
+            import hardware_gpiozero as hardware
+            print("Using gpiozero")
+        except ModuleNotFoundError:
+            print("pigpio, lgpio or gpiozero must be installed", file=sys.stderr)
+            sys.exit(1)
 
 TIME_PATTERN = re.compile(r'^(?P<hour>\d\d):(?P<minute>\d\d)$')
 

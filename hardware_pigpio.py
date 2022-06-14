@@ -7,6 +7,9 @@ class Hardware:
         for p in self.pins:
             self.pi.set_PWM_range(p, 255)
             self.pi.set_PWM_dutycycle(p, 255)
+    
+    def __del__(self):
+        self.pi.stop()
 
     def setColor(self, color, brightness):
         if color is None:
