@@ -1,9 +1,19 @@
+import sys
 from threading import Thread, Condition
 import re
 from datetime import datetime as dt
 from effects import ConfigEffectTransformer
-# import hardware_pigpio as hardware
-import hardware_lgpio as hardware
+
+try:
+    import hardware_pigpio as hardware
+    print("Using pigpio")
+except ModuleNotFoundError:
+    try:
+        import hardware_lgpio as hardware
+        print("Using lgpio")
+    except ModuleNotFoundError:
+        print("pigpio or lgpio must be installed", file=sys.stderr)
+        sys.exit(1)
 
 TIME_PATTERN = re.compile(r'^(?P<hour>\d\d):(?P<minute>\d\d)$')
 

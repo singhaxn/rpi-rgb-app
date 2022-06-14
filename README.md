@@ -6,7 +6,7 @@ This app was inspired by [this article](https://www.instructables.com/id/Easiest
 
 ## How does it work?
 
-This is a [`Flask`](https://flask.palletsprojects.com/en/2.1.x/) application, that uses the [`lgpio` library](https://abyz.me.uk/lg/py_lgpio.html), to set GPIO signals to control a connected RGB LED strip. An RGB amplifier is used to convert the 3.3V GPIO signals to 12V as required by a 5050 RGB strip.
+This is a [`Flask`](https://flask.palletsprojects.com/en/2.1.x/) application, that uses either [`pigpio`](https://abyz.me.uk/rpi/pigpio/python.html) or [`lgpio`](https://abyz.me.uk/lg/py_lgpio.html), to set GPIO signals to control a connected RGB LED strip. An RGB amplifier is used to convert the 3.3V GPIO signals to 12V as required by a 5050 RGB strip.
 
 Although this app has only been tested with a 12V strip, with an appropriate amplifier or circuit, this may even work with 5V strips.
 
@@ -20,9 +20,9 @@ The following instructions assume that the red, green and blue channels are bein
 
 ### Hardware connections
  
-The pin layout shown here is for a 1st generation RPi. Please check the layout for your version, before connecting.
+The pin layout shown here is for a 1st generation RPi. Please check the pin layout for your version, before connecting.
 
-![alt text](./connections.png "Connections")
+![Connections](./connections.png "Connections")
 
 ### Software
 Get to the command prompt on your RPi (direct login or SSH).
@@ -31,9 +31,16 @@ Install the prerequisites
 ```
 sudo apt-get install python3 python3-flask git
 ```
-Install lgpio
-- Instructions for Ubuntu: https://ubuntu.com/tutorials/gpio-on-raspberry-pi#2-installing-gpio
-- Instructions for other OSes (including Raspberry Pi OS): http://abyz.me.uk/lg/download.html
+Install _one_ of the following libraries:
+- __`pigpio`__ (recommended but only works on kernel 5.10 or lower)
+    - Raspbian / Raspberry Pi OS Legacy (Buster):
+        ```
+        sudo apt-get install pigpiod pigpio-tools python3-pigpio
+        ```
+    - Others: https://abyz.me.uk/rpi/pigpio/download.html
+- __`lgpio`__ (flickering observed)
+    - Ubuntu: https://ubuntu.com/tutorials/gpio-on-raspberry-pi#2-installing-gpio
+    - Others (including Raspberry Pi OS): http://abyz.me.uk/lg/download.html
 
 Determine the IP address of your RPi and note it down. For simplicity, we will refer to this IP address as `<Pi_IP_Address>`, where required.
 ```
@@ -47,10 +54,10 @@ Navigate into your app folder
 ```
 cd rpi-rgb-app
 ```
-See the [App Configuration](#app-configuration) section below and make any changes that may be required for your environment.
+<!-- See the [App Configuration](#app-configuration) section below and make any changes that may be required for your environment. -->
 
-Edit `rgb-app.service`, specify the correct `User` and `WorkingDirectory` under the `[Service]` section:
-- `User` should be the name of the user that owns the `rpi-rgb-app` directory
+Open `rgb-app.service` in your favorite editor and specify the correct `User` and `WorkingDirectory` in the `[Service]` section:
+- `User` should be the owner of the `rpi-rgb-app` directory
 - `WorkingDirectory` should be the absolute path to the `rpi-rgb-app` directory
 
 Copy the service file into `/etc/systemd/system`
@@ -62,7 +69,7 @@ Start the service
 sudo systemctl daemon-reload
 sudo service rgb-app start
 ```
-Get the RGB app to start up automatically at boot:
+Start the service automatically at boot
 ```
 sudo systemctl enable rgb-app.service
 ```
@@ -71,13 +78,13 @@ sudo systemctl enable rgb-app.service
 
 In a web browser, on any device on your network (same network as the RPi), open the page `http://<Pi_IP_Address>:5000/`. On this page, click the power button. The LED strip should turn on white and you should see a page similar to this:
 
-![alt text](rgb-app-ui.png "UI")
+![UI](rgb-app-ui.png "UI")
 
 If not, see the [Troubleshooting](#troubleshooting) section below.
 
 The gear icons can be used to edit colors and effects:
 
-![alt text](rgb_sequence_editor.png "Sequence editor")
+![Sequence editor](rgb_sequence_editor.png "Sequence editor")
 
 
 ## App Configuration
