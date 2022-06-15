@@ -1,18 +1,21 @@
-from flask import Flask, render_template, request
 import os
 import sys
 import json
 import signal
-from config import Config
-from renderer import Renderer
-import logging
 
 # To enable debug logging: export FLASK_ENV=development
 # os.environ["FLASK_ENV"] = "development"
-# os.environ["FLASK_ENV"] = "production"
 
+import logging
+loglevel = logging.DEBUG if os.getenv("FLASK_ENV", "production") == "development" else logging.INFO
+logging.basicConfig(stream=sys.stdout, level=loglevel)
+
+from flask import Flask, render_template, request
 app = Flask(__name__)
-app.logger.setLevel(logging.DEBUG if os.getenv("FLASK_ENV", "production") == "development" else logging.INFO)
+app.app_context().push()
+
+from config import Config
+from renderer import Renderer
 
 config = Config("config/settings.json")
 renderer = Renderer(config)
@@ -38,7 +41,7 @@ def sequence_editor():
 def set_power():
     data = request.get_json()
     settings = config.get()
-    app.logger.debug(data)
+    app.logger.debug(f"set_power: {data}, {settings['on']}")
     if settings["on"] != data["on"]:
         config.setOn(data["on"])
         renderer.applySettings()
@@ -123,8 +126,8 @@ def apply_effect():
 
 if __name__ == "__main__":
     def sigtermReceived(signum, frame):
-        app.logger.info("Received SIGTERM. Stopping renderer...")
-        renderer.stop()
+        app.logger.info("Received SIGTERM")
+        sys.exit(0)
 
     try:
         renderer.start()

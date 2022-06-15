@@ -16,7 +16,7 @@ Here, we assume that you already have Raspberry Pi OS (or a compatible OS) insta
 
 If you intend to run only this app on your RPi, the Lite image on a RPi Zero, should suffice.
 
-The following instructions assume that the red, green and blue channels are being controlled by GPIO23, GPIO24 and GPIO25, respectively. Please make adjustments, as appropriate for your environment.
+The following instructions assume that the red, green and blue channels are being controlled by GPIO23, GPIO24 and GPIO25, respectively. If you're using different pins please see the [App Configuration](#app-configuration) section below.
 
 ### Hardware connections
  
@@ -54,7 +54,6 @@ Navigate into your app folder
 ```
 cd rpi-rgb-app
 ```
-<!-- See the [App Configuration](#app-configuration) section below and make any changes that may be required for your environment. -->
 
 Open `rgb-app.service` in your favorite editor and specify the correct `User` and `WorkingDirectory` in the `[Service]` section:
 - `User` should be the owner of the `rpi-rgb-app` directory
@@ -109,11 +108,26 @@ sudo service rgb-app start
 1. ### `http://<Pi_IP_Address>:5000/` returns an `ERR_CONNECTION_REFUSED` error
     - Make sure, the correct bind address is specified in the configuration file, as described in the [App Configuration](#app-configuration) section above.
 
-2. ### `pigs` works but you can't control your LED strip from the web interface
-    - Make sure, the correct GPIO pin IDs are specified in the configuration file, as described in the [App Configuration](#app-configuration) section above.
-    - Check whether __Schedule__ is enabled in the web interface. If so, then the LED strip will only turn on when specified in the schedule. Disable __Schedule__ if you want to control the lights manually.
-    - Make sure __Brightness__ is not set too low on the web interface.
-    - Make sure __Color__ is not set to `[0, 0, 0]` on the web interface.
-
-3. ### LED Colors are wrong
+2. ### LED Colors are wrong
     - Do not expect the color reproduction of your RGB LED strips to be accurate with respect to the colors you see on your screen. Each LED strip is likely to have a different calibration. This is why only red, green, blue and white presets are provided by default. Still, double check to make sure the correct GPIO pin IDs are specified in the configuration file, as described in the [App Configuration](#app-configuration) section above.
+
+3. ### `pigpio`-specific issues
+    1. #### `pigs` works but you can't control your LED strip from the web interface
+        - Make sure, the correct GPIO pin IDs are specified in the configuration file, as described in the [App Configuration](#app-configuration) section above.
+        - Check whether __Schedule__ is enabled in the web interface. If so, then the LED strip will only turn on when specified in the schedule. Disable __Schedule__ if you want to control the lights manually.
+        - Make sure __Brightness__ is not set too low on the web interface.
+        - Make sure __Color__ is not set to `[0, 0, 0]` on the web interface.
+    2. #### CPU usage is too high
+        If you're using pigpio for the sole purpose of controlling an RGB strip, consider turning off alert sampling as follows:
+        - Open `/lib/systemd/system/pigpiod.service` in your favorite editor and add the `-m` flag on the `ExecStart` line in the `[Service]` section:
+            ```
+            ExecStart=/usr/bin/pigpiod -l -s 10 -m
+            ```
+        - Restart the relevant services
+            ```
+            sudo service rgb-app stop
+            sudo service pigpiod stop
+            sudo systemctl daemon-reload
+            sudo service pigpiod start
+            sudo service rgb-app start
+            ```
