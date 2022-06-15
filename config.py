@@ -3,6 +3,10 @@ import os
 import threading
 from datetime import datetime as dt
 import copy
+import logging
+
+def logger():
+    return logging.getLogger(__name__)
 
 class Config:
     def __init__(self, path):
@@ -50,7 +54,7 @@ class Config:
         self.lock.release()
 
     def setOn(self, value):
-        print("Config.setOn", value)
+        logger().debug(f"Config.setOn: {value}")
         def update(settings, value):
             settings["on"] = value
         self.updateSetting(update, value)

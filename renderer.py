@@ -3,17 +3,25 @@ from threading import Thread, Condition
 import re
 from datetime import datetime as dt
 from effects import ConfigEffectTransformer
+import logging
+
+def logger():
+    return logging.getLogger(__name__)
 
 try:
     import hardware_pigpio as hardware
-    print("Using pigpio")
+    logger().info("Using pigpio")
 except ModuleNotFoundError:
     try:
         import hardware_lgpio as hardware
-        print("Using lgpio")
+        logger().info("Using lgpio")
     except ModuleNotFoundError:
-        print("pigpio or lgpio must be installed", file=sys.stderr)
-        sys.exit(1)
+        try:
+            import hardware_gpiozero as hardware
+            logger().info("Using gpiozero")
+        except ModuleNotFoundError:
+            logger().critical("pigpio, lgpio or gpiozero must be installed", file=sys.stderr)
+            sys.exit(1)
 
 TIME_PATTERN = re.compile(r'^(?P<hour>\d\d):(?P<minute>\d\d)$')
 
@@ -49,15 +57,16 @@ class Renderer(Thread):
         self.lock.release()
 
     def stop(self):
-        self.lock.acquire()
+        if self.active:
+            self.lock.acquire()
 
-        self.active = False
-        self.hardware.setColor(None, 0)
+            self.active = False
+            self.hardware.setColor(None, 0)
 
-        self.lock.notify_all()
-        self.lock.release()
+            self.lock.notify_all()
+            self.lock.release()
 
-        self.join()
+            self.join()
 
     def transformEffect(self, effectJson):
         if self.lastEffectJson != effectJson:
